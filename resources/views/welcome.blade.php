@@ -9,6 +9,7 @@
     <title>Controls</title>
 </head>
 <body>
+    {{$errors}}
     <button class="button button-primary button-large">
         Continue with email
     </button>

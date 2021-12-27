@@ -10,10 +10,12 @@
         "guzzlehttp/guzzle": "^7.0.1",
         "kreait/firebase-php": "^5.25",
         "laravel/framework": "^8.65",
-        "laravel/sanctum": "^2.11",
-        "laravel/tinker": "^2.5"
+        "laravel/sanctum": "^2.13",
+        "laravel/tinker": "^2.5",
+        "predis/predis": "^1.0"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.6",
         "facade/ignition": "^2.5",
         "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",

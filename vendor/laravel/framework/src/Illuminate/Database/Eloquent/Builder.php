@@ -79,7 +79,6 @@ class Builder
      * @var string[]
      */
     protected $passthru = [
-        'aggregate',
         'average',
         'avg',
         'count',

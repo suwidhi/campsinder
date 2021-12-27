@@ -267,8 +267,7 @@ EOF;
     public function assertRedirect($uri = null)
     {
         PHPUnit::assertTrue(
-            $this->isRedirect(),
-            $this->statusMessageWithDetails('201, 301, 302, 303, 307, 308', $this->getStatusCode()),
+            $this->isRedirect(), 'Response status code ['.$this->getStatusCode().'] is not a redirect status code.'
         );
 
         if (! is_null($uri)) {
@@ -287,8 +286,7 @@ EOF;
     public function assertRedirectContains($uri)
     {
         PHPUnit::assertTrue(
-            $this->isRedirect(),
-            $this->statusMessageWithDetails('201, 301, 302, 303, 307, 308', $this->getStatusCode()),
+            $this->isRedirect(), 'Response status code ['.$this->getStatusCode().'] is not a redirect status code.'
         );
 
         PHPUnit::assertTrue(
@@ -312,8 +310,7 @@ EOF;
         }
 
         PHPUnit::assertTrue(
-            $this->isRedirect(),
-            $this->statusMessageWithDetails('201, 301, 302, 303, 307, 308', $this->getStatusCode()),
+            $this->isRedirect(), 'Response status code ['.$this->getStatusCode().'] is not a redirect status code.'
         );
 
         $request = Request::create($this->headers->get('Location'));
@@ -835,57 +832,30 @@ EOF;
                 : 'Response does not have JSON validation errors.';
 
         foreach ($errors as $key => $value) {
-            if (is_int($key)) {
-                $this->assertJsonValidationErrorFor($value, $responseKey);
+            PHPUnit::assertArrayHasKey(
+                (is_int($key)) ? $value : $key,
+                $jsonErrors,
+                "Failed to find a validation error in the response for key: '{$value}'".PHP_EOL.PHP_EOL.$errorMessage
+            );
 
-                continue;
-            }
-
-            $this->assertJsonValidationErrorFor($key, $responseKey);
-
-            foreach (Arr::wrap($value) as $expectedMessage) {
-                $errorMissing = true;
+            if (! is_int($key)) {
+                $hasError = false;
 
                 foreach (Arr::wrap($jsonErrors[$key]) as $jsonErrorMessage) {
-                    if (Str::contains($jsonErrorMessage, $expectedMessage)) {
-                        $errorMissing = false;
+                    if (Str::contains($jsonErrorMessage, $value)) {
+                        $hasError = true;
 
                         break;
                     }
                 }
-            }
 
-            if ($errorMissing) {
-                PHPUnit::fail(
-                    "Failed to find a validation error in the response for key and message: '$key' => '$expectedMessage'".PHP_EOL.PHP_EOL.$errorMessage
-                );
+                if (! $hasError) {
+                    PHPUnit::fail(
+                        "Failed to find a validation error in the response for key and message: '$key' => '$value'".PHP_EOL.PHP_EOL.$errorMessage
+                    );
+                }
             }
         }
-
-        return $this;
-    }
-
-    /**
-     * Assert the response has any JSON validation errors for the given key.
-     *
-     * @param  string  $key
-     * @param  string  $responseKey
-     * @return $this
-     */
-    public function assertJsonValidationErrorFor($key, $responseKey = 'errors')
-    {
-        $jsonErrors = Arr::get($this->json(), $responseKey) ?? [];
-
-        $errorMessage = $jsonErrors
-            ? 'Response has the following JSON validation errors:'.
-            PHP_EOL.PHP_EOL.json_encode($jsonErrors, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE).PHP_EOL
-            : 'Response does not have JSON validation errors.';
-
-        PHPUnit::assertArrayHasKey(
-            $key,
-            $jsonErrors,
-            "Failed to find a validation error in the response for key: '{$key}'".PHP_EOL.PHP_EOL.$errorMessage
-        );
 
         return $this;
     }

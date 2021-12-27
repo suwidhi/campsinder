@@ -1242,7 +1242,7 @@ class Builder
     /**
      * Add a "where date" statement to the query.
      *
-     * @param  \Illuminate\Database\Query\Expression|string  $column
+     * @param  string  $column
      * @param  string  $operator
      * @param  \DateTimeInterface|string|null  $value
      * @param  string  $boolean
@@ -2102,7 +2102,7 @@ class Builder
         $property = $this->unions ? 'unionLimit' : 'limit';
 
         if ($value >= 0) {
-            $this->$property = ! is_null($value) ? (int) $value : null;
+            $this->$property = $value;
         }
 
         return $this;
@@ -3259,10 +3259,11 @@ class Builder
         }
 
         if (is_array($value)) {
-            $this->bindings[$type] = array_values(array_map(
-                [$this, 'castBinding'],
-                array_merge($this->bindings[$type], $value),
-            ));
+            $this->bindings[$type] = collect($this->bindings[$type])
+                            ->merge($value)
+                            ->map([$this, 'castBinding'])
+                            ->values()
+                            ->toArray();
         } else {
             $this->bindings[$type][] = $this->castBinding($value);
         }
